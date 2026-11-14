@@ -1,0 +1,73 @@
+# dsh-usage-panel
+
+**All your AI coding subscriptions in one popup** — for [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/DeepSeek-Harness).
+
+GLM (Z.AI) / opencode go / Codex (ChatGPT) / Claude / DeepSeek / Command Code usage, shown as clean cards in a sidebar popup. Quota-reset credits (GLM / Codex) can be spent **from the panel**. No dependencies — Node.js 18+ only.
+
+![Panel preview](docs/preview-panel.png)
+
+## Features
+
+- **One popup, every subscription** — only shows services you actually use. 5-hour / weekly / monthly windows with usage bars, reset times and plan badges. 70%+ amber, 90%+ red.
+- **Spend quota resets from the panel** — GLM coding-plan resets (5-hour / weekly) and Codex reset credits with two-step confirm. Claude reset credits are shown read-only.
+- **Peak clock** — for time-of-day-priced models (GLM, DeepSeek) a 24h band shows peak vs off-peak windows, current time, and the exact start/end times in your local timezone.
+  ![Peak clock](docs/preview-peak-clock.png)
+- **Fast by design** — stale-while-revalidate: the last snapshot renders instantly while fresh data loads underneath. Server warms its cache at boot; polling stops when the panel or window is hidden.
+- **Drag to reorder** — grab the ⋮⋮ handle on any card. Order persists in `localStorage`; the header button resets it.
+- **CLI included** — `node usage.mjs` prints the same data in your terminal (`--json` for scripting).
+
+## Install (DSH desktop)
+
+1. Clone or download this repository.
+2. DSH → **Plugins → Add plugin → Install a third-party plugin**.
+3. Select the `bundle` folder of this repository.
+
+Web profile: `dsh plugin --profile web add <path-to>/dsh-usage-panel/bundle`.
+
+The panel mounts a small usage-server on `127.0.0.1:50071` when DSH loads the plugin — no manual steps, no background daemon. Open it from the **Usage** button at the bottom of the sidebar.
+
+## Where credentials are read from
+
+The server reads tokens **locally only** — nothing is sent anywhere except the official endpoints of each service. Tokens never reach the browser side.
+
+| Service | Source |
+|---|---|
+| GLM resets | `~/.zcode/v2/credentials.json` (ZCode's encrypted store, decrypted in-process) |
+| Codex / Claude | `~/.dsh/plugins/subscriptions/auth.json` (DSH subscription logins) |
+| DeepSeek | balance snapshot from `@linxin666/dsh-usage` if installed |
+| opencode go | `~/.local/share/opencode/account.json` + official usage API |
+| GLM usage | `ZAI_API_KEY` env or `~/.config/opencode/opencode.json` |
+| Command Code | `COMMANDCODE_API_KEY` env or `~/.dsh/.env` |
+
+Services without credentials are simply not shown.
+
+## Reset safety
+
+Resets are irreversible, so the local server requires:
+
+- a custom header (`x-sup-reset: 1`) + JSON content-type — plain cross-site POSTs cannot reach it
+- an allow-listed `Origin` (`dsh-app://app`, `127.0.0.1`, `localhost`, `[::1]`)
+- two-step confirmation in the UI
+
+## Unofficial endpoints
+
+Codex / Claude usage numbers come from unofficial endpoints and may break when those services change. Everything else uses official APIs.
+
+## CLI
+
+```bash
+node usage.mjs            # GLM + opencode go
+node usage.mjs glm        # GLM only
+node usage.mjs --json     # JSON output
+node server.mjs           # standalone usage server (usually unnecessary)
+```
+
+## Development
+
+```bash
+node verify.mjs           # bundle syntax / module contract / boundary checks
+```
+
+## License
+
+MIT

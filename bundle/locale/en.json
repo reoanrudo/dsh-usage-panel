@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "title": "Subscription Usage",
+    "description": "Shows GLM, opencode go, Codex, Claude, and DeepSeek usage on one panel."
+  },
+  "panel": "Usage",
+  "title": "Subscription usage",
+  "refresh": "Refresh",
+  "updated": "Updated",
+  "notConnected": "Not connected",
+  "error": "Error",
+  "loading": "Loading…",
+  "reset": "Resets",
+  "plan": "Plan",
+  "account": "Account",
+  "balance": "Balance",
+  "models": "Models",
+  "serverDown": "Usage server is not running. Start it with: node server.mjs"
+}

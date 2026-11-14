@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "title": "サブスク使用量",
+    "description": "GLM・opencode go・Codex・Claude・DeepSeek の使用量を1画面で表示します。"
+  },
+  "panel": "使用量",
+  "title": "サブスク使用量",
+  "refresh": "更新",
+  "updated": "更新時刻",
+  "notConnected": "未連携",
+  "error": "エラー",
+  "loading": "読み込み中…",
+  "reset": "リセット",
+  "plan": "プラン",
+  "account": "アカウント",
+  "balance": "残高",
+  "models": "モデル別",
+  "serverDown": "使用量サーバーが起動していません。`node server.mjs` で起動してください。"
+}
