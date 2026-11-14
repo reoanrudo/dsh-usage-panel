@@ -1,0 +1,1 @@
+AI engineering: on-device inference, Metal/GPU, LLM agent tooling. Rust / Swift / TS. Building a shogi AI engine, image-gen on Apple Silicon & agent plugins.

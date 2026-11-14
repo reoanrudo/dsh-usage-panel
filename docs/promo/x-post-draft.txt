@@ -1,0 +1,10 @@
+DSH（DeepSeek Harness）で GLM / Codex / Claude / DeepSeek / opencode go / Command Code のサブスク使用量を 1 つのポップアップにまとめるプラグインを作りました。
+
+・5時間枠・週枠の使用率バーとリセット時刻
+・GLM/Codex の「使用量リセット権」をパネルから直接消費
+・ピーク時間帯（×2課金）を 24h バーで可視化
+・カードはドラッグで並べ替え。Node 18+ / 依存ゼロ
+
+github: https://github.com/TKY-27/dsh-usage-panel
+
+#DeepSeek #GLM #ClaudeCode #AIコーディング
