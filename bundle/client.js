@@ -82,7 +82,8 @@ window.__ModuleLoader__.load({
         --track:rgba(120,120,128,.34); --pill:rgba(120,120,128,.26); --tile:#3a3a3c; --tileline:rgba(255,255,255,.14); } }
 
       /* ポップオーバー（サイドバー下部ボタンの上に出す） */
-      .sup-pop { position:absolute; left:16px; bottom:58px; width:min(320px, calc(100vw - 32px)); max-height:min(72vh, 480px);
+      .sup-pop { position:absolute; left:16px; bottom:58px; width:min(320px, calc(100vw - 32px));
+        max-height:calc(100vh - 70px); /* 全カードが見えることを優先。溢れたらスクロール */
         display:flex; flex-direction:column; overflow:hidden;
         background:var(--card); border:1px solid var(--line); border-radius:14px;
         box-shadow:0 18px 50px rgba(0,0,0,.26), 0 2px 6px rgba(0,0,0,.10);
