@@ -74,6 +74,16 @@ See [docs/add-provider.md](docs/add-provider.md) for a 3-step guide: write a fet
 node verify.mjs           # bundle syntax / module contract / boundary checks
 ```
 
+## Terms of Service risk
+
+This panel calls **non-official endpoints** for two services. Know before you use:
+
+- **Claude**: usage numbers come from Anthropic's OAuth usage endpoint using the token Claude Code stores in your Keychain. Anthropic's [Authentication and credential use policy](https://code.claude.com/docs/en/legal-and-compliance) (updated Feb 2026) restricts third-party developers from offering Claude.ai login in their own applications and from collecting or intermediating Claude.ai credentials or session tokens. A local panel that reads the token Claude Code itself stored is a gray area — treat it accordingly and consider whether you are comfortable with that before enabling the Claude card.
+- **Codex (ChatGPT)**: usage numbers and reset-credit consumption use undocumented `chatgpt.com/backend-api/wham/*` endpoints. OpenAI's [Terms of Use](https://openai.com/policies/row-terms-of-use/) prohibit programmatically extracting data and circumventing rate limits; spending a reset credit is an action ChatGPT itself offers in its UI, but automated consumption is your judgement call.
+- **GLM (Z.AI)**: reset consumption calls the same `zcode.z.ai` API the official ZCode app calls with the same account tokens. Z.AI's [Usage Policy](https://docs.z.ai/devpack/usage-policy) limits the plan to officially supported tools — a third-party panel may fall outside that wording.
+
+Everything else (opencode go, Command Code) uses documented official APIs with your own API keys. If any of this is not acceptable to you, remove the corresponding card by not connecting that service — the panel simply hides services without credentials.
+
 ## License
 
 MIT
