@@ -5,6 +5,6 @@ DSH（DeepSeek Harness）で GLM / Codex / Claude / DeepSeek / opencode go / Com
 ・ピーク時間帯（×2課金）を 24h バーで可視化
 ・カードはドラッグで並べ替え。Node 18+ / 依存ゼロ
 
-github: https://github.com/TKY-27/dsh-usage-panel
+github: https://github.com/reoanrudo/dsh-usage-panel
 
 #DeepSeek #GLM #ClaudeCode #AIコーディング

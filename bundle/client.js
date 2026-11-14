@@ -595,8 +595,7 @@ window.__ModuleLoader__.load({
             h("circle", { cx: 3, cy: 12, r: 1.2, fill: "currentColor" }), h("circle", { cx: 7, cy: 12, r: 1.2, fill: "currentColor" }))),
         h(BrandIcon, { id: s.id }),
         h("div", { style: { minWidth: 0 } },
-          h("div", { className: "sup-cname" }, s.name),
-          s.account && h("div", { className: "sup-cacct", title: s.account }, s.account)),
+          h("div", { className: "sup-cname" }, s.name)),
         s.plan && h("span", { className: "sup-pill" }, s.plan));
 
       let body;

@@ -34,7 +34,7 @@ AI開発者としての印象を最優先するなら:
 
 ```bash
 cd ~/dsh-workspaces/default/dsh-usage-panel
-git remote add origin git@github.com:TKY-27/dsh-usage-panel.git   # または https URL
+git remote add origin git@github.com:reoanrudo/dsh-usage-panel.git   # または https URL
 git push -u origin main
 ```
 
@@ -44,7 +44,7 @@ Topics: `deepseek` `glm` `claude` `ai-tools` `electron` 等
 
 ## 5. README profile README（任意・さらにAI寄りにするなら）
 
-TKY-27/TKY-27 リポジトリを作ると profile 上部に大きな自己紹介が出せます。
+reoanrudo/reoanrudo リポジトリを作ると profile 上部に大きな自己紹介が出せます。
 作る場合は言ってください — 雛形を書きます。
 
 
