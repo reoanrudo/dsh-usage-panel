@@ -1,5 +1,7 @@
 # dsh-usage-panel
 
+[![Awesome DSH Plugin](https://awesome-dsh-plugin.com/badge.svg)](https://awesome-dsh-plugin.com)
+
 **All your AI coding subscriptions in one popup** — for [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/DeepSeek-Harness).
 
 GLM (Z.AI) / opencode go / Codex (ChatGPT) / Claude / DeepSeek / Command Code usage, shown as clean cards in a sidebar popup. Quota-reset credits (GLM / Codex) can be spent **from the panel**. No dependencies — Node.js 18+ only.
