@@ -64,7 +64,7 @@ node server.mjs           # standalone usage server (usually unnecessary)
 
 ## Adding a provider
 
-See [docs/add-provider.ja.md](docs/add-provider.ja.md) (Japanese) for a 3-step guide: write a fetcher, register it in `fetchAllSubscriptions`, and drop a 64px icon. The server contract is one small JSON object — see the table there.
+See [docs/add-provider.md](docs/add-provider.md) for a 3-step guide: write a fetcher, register it in `fetchAllSubscriptions`, and drop a 64px icon. The server contract is one small JSON object — see the table there.
 
 ## Development
 

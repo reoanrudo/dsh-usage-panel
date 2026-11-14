@@ -92,7 +92,7 @@ export async function useCodingPlanReset(type, options = {}) {
   if (!RESET_TYPES.includes(type)) throw new Error(`unknown reset type: ${type}`);
   const env = options.env ?? process.env;
   const credentials = await loadZcodeResetCredentials(env);
-  if (!credentials) throw new Error("ZCode の認証情報が見つかりません（ZCode にログインしてください）");
+  if (!credentials) throw new Error("ZCode credentials not found (log in to ZCode first)");
   const idempotencyKey = (options.idempotencyKey ?? randomUUID()).trim();
   if (!idempotencyKey || idempotencyKey.length > 64) throw new Error("invalid idempotency key");
   const body = await requestJson(

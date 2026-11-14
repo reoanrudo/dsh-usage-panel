@@ -51,7 +51,7 @@ function gcmDecrypt(ivB64, tagB64, dataB64, key) {
 /** enc:v1（ZCode 旧フォールバック鍵）を復号する。 */
 function decryptV1(value, key) {
   const [iv, tag, data] = value.slice(ENC_PREFIX.length).split(".");
-  if (!iv || !tag || !data) throw new Error("ZCode 認証情報の形式が不正です");
+  if (!iv || !tag || !data) throw new Error("malformed ZCode credential value");
   return gcmDecrypt(iv, tag, data, key);
 }
 
@@ -75,7 +75,7 @@ async function loadKeychainKey(credentialsPath) {
     });
   });
   const key = Buffer.from(stdout.trim(), "base64url");
-  if (key.length !== 32) throw new Error("Keychain の鍵の長さが不正です");
+  if (key.length !== 32) throw new Error("unexpected Keychain key length");
   keychainKeyCache = key;
   return key;
 }
@@ -87,20 +87,20 @@ async function loadKeychainKey(credentialsPath) {
 async function decryptV2(value, credentialsPath, env = process.env) {
   const rest = value.slice(V2_PREFIX.length);
   const [source, fp, payload] = rest.split(":");
-  if (source !== "os" && source !== "env") throw new Error(`ZCode 認証情報の enc:v2 ソースが不明です: ${source}`);
+  if (source !== "os" && source !== "env") throw new Error(`unknown enc:v2 source in ZCode credentials: ${source}`);
   const [iv, tag, data] = (payload ?? "").split(".");
-  if (!iv || !tag || !data) throw new Error("ZCode 認証情報の形式が不正です");
+  if (!iv || !tag || !data) throw new Error("malformed ZCode credential value");
   let key;
   if (source === "os") {
     key = await loadKeychainKey(credentialsPath);
   } else {
     const secret = env[SECRET_ENV]?.trim();
-    if (!secret) throw new Error("enc:v2:env の鍵候補（ZCODE_CREDENTIAL_SECRET）がありません");
+    if (!secret) throw new Error("no key candidate for enc:v2:env (ZCODE_CREDENTIAL_SECRET is unset)");
     key = createHash("sha256").update(secret).digest();
   }
   // 鍵が正しいか fingerprint（sha256(key) 先頭12バイト hex）で確認
   const fpExpect = createHash("sha256").update(key).digest().subarray(0, 12).toString("hex");
-  if (fp !== fpExpect) throw new Error("enc:v2 の鍵fingerprintが一致しません");
+  if (fp !== fpExpect) throw new Error("enc:v2 key fingerprint mismatch");
   return gcmDecrypt(iv, tag, data, key);
 }
 

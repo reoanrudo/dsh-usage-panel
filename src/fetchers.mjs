@@ -91,7 +91,7 @@ function resetSummary(status) {
 }
 
 async function fetchGlm() {
-  const base = { id: "glm", name: "GLM（Z.AI）", connected: false };
+  const base = { id: "glm", name: "GLM (Z.AI)", connected: false };
   // リセット権は ZCode の認証情報から取る。使用量APIとは並行して取りに行く。
   const resetPromise = fetchCodingPlanResetStatus().catch(() => null);
   const keys = await zaiKeys();
@@ -101,7 +101,7 @@ async function fetchGlm() {
     return { ...base, reset, connected: true, status: "ok", plan: null, windows: [] };
   }
   let body = null;
-  let lastError = "取得失敗";
+  let lastError = "fetch failed";
   for (const key of keys) {
     const res = await fetch("https://api.z.ai/api/monitor/usage/quota/limit", {
       headers: { Authorization: `Bearer ${key}`, "Accept-Language": "en-US" },
@@ -163,7 +163,7 @@ async function fetchOpencodeGoUsage(key) {
         label: OC_GO_LABEL[k] ?? k,
         percent: u[k].percent ?? null,
         resetAt: fmtIso(u[k].resetsAt),
-        detail: u[k].status && u[k].status !== "ok" ? `状態: ${u[k].status}` : null,
+        detail: u[k].status && u[k].status !== "ok" ? `status: ${u[k].status}` : null,
       },
     )
     .filter(Boolean);
@@ -209,7 +209,7 @@ async function fetchOpencodeGo() {
   }
 
   if (!windows && !stats) {
-    return { ...base, connected: true, status: "error", error: "usage API・opencode stats の両方に失敗しました" };
+    return { ...base, connected: true, status: "error", error: "both the usage API and opencode stats failed" };
   }
 
   const goModels = stats ? (stats.models ?? []).filter((m) => m.model?.providerID === "opencode-go") : [];
@@ -230,14 +230,14 @@ async function fetchOpencodeGo() {
           cost: sum((m) => m.cost),
         }
       : null,
-    notes: windows ? [] : ["usage API に到達できなかったため、ローカル記録のみ表示しています。"],
+    notes: windows ? [] : ["Usage API unreachable — showing local records only."],
   };
 }
 
 // ---------- Codex ----------
 
 async function fetchCodex() {
-  const base = { id: "codex", name: "Codex（ChatGPT）", connected: false };
+  const base = { id: "codex", name: "Codex (ChatGPT)", connected: false };
   const acc = await codexAccount();
   if (!acc?.accessToken) return base;
   const headers = {
@@ -348,11 +348,11 @@ export async function fetchCodexResetCredits() {
  */
 export async function consumeCodexResetCredit(creditId) {
   const headers = await codexHeaders();
-  if (headers === null) return { ok: false, error: "Codex の認証情報がありません" };
+  if (headers === null) return { ok: false, error: "no Codex credentials" };
   const credits = await fetchCodexResetCredits();
-  if (!credits || credits.length === 0) return { ok: false, error: "利用可能なリセット権がありません" };
+  if (!credits || credits.length === 0) return { ok: false, error: "no available reset credits" };
   const target = creditId ? credits.find((c) => c.id === creditId) : credits[0];
-  if (!target) return { ok: false, error: "指定のリセット権が見つかりません" };
+  if (!target) return { ok: false, error: "specified reset credit not found" };
 
   const res = await fetch("https://chatgpt.com/backend-api/wham/rate-limit-reset-credits/consume", {
     method: "POST",
@@ -543,7 +543,7 @@ async function fetchClaude() {
   const now = Date.now();
   // 成功キャッシュが新しい / バックオフ中なら API を叩かない
   if (claudeCache && now - claudeCacheAt < CLAUDE_TTL) return claudeCache;
-  if (now < claudeBackoffUntil) return claudeCache ?? { ...base, connected: true, status: "error", error: "レート制限中（しばらく待機）" };
+  if (now < claudeBackoffUntil) return claudeCache ?? { ...base, connected: true, status: "error", error: "rate-limited (backing off)" };
 
   let res = await callUsage(acc);
   if (res.status === 401) {
@@ -560,10 +560,10 @@ async function fetchClaude() {
     if (claudeCache) {
       return {
         ...claudeCache,
-        notes: [`レート制限中のため前回値（${fmtReset(claudeCacheAt)}）`, ...(claudeCache.notes ?? []).filter((n) => !n.startsWith("レート制限中"))],
+        notes: [`Rate-limited — showing previous values (${fmtReset(claudeCacheAt)})`, ...(claudeCache.notes ?? []).filter((n) => !n.startsWith("rate-limited"))],
       };
     }
-    return { ...base, connected: true, status: "error", error: `HTTP ${res.status}（レート制限中・しばらく待機）` };
+    return { ...base, connected: true, status: "error", error: `HTTP ${res.status} (rate-limited, backing off)` };
   }
   if (!res.ok) return { ...base, connected: true, status: "error", error: `HTTP ${res.status}` };
   const j = await res.json();
@@ -662,10 +662,10 @@ async function commandcodeFromLedger(base) {
     status: "ok",
     plan: "GOAT",
     windows: [
-      { label: "今日の使用 (DSHローカル集計)", percent: null, detail: `${tok(today.calls)} calls / ${tok(today.input + today.output)} tokens` },
-      { label: "合計の使用 (DSHローカル集計)", percent: null, detail: `${tok(total.calls)} calls / ${tok(total.input + total.output)} tokens` },
+      { label: "Today (local ledger)", percent: null, detail: `${tok(today.calls)} calls / ${tok(today.input + today.output)} tokens` },
+      { label: "All time (local ledger)", percent: null, detail: `${tok(total.calls)} calls / ${tok(total.input + total.output)} tokens` },
     ],
-    notes: ["使用量APIを取得できませんでした（ローカル集計を表示）", "公式の内訳は Studio (commandcode.ai/studio) で確認できます"],
+    notes: ["Usage API unavailable (showing local ledger)", "Official breakdown at commandcode.ai/studio"],
   };
 }
 
@@ -673,7 +673,7 @@ export async function fetchCommandcode() {
   const base = { id: "commandcode", name: "Command Code", connected: false };
   const key = await commandCodeKey();
   if (!key) {
-    return { ...base, connected: true, status: "error", error: "COMMANDCODE_API_KEY が未設定です" };
+    return { ...base, connected: true, status: "error", error: "COMMANDCODE_API_KEY not set" };
   }
   const auth = { Authorization: `Bearer ${key}`, "Accept-Language": "en-US" };
   const usd2 = (n) => `$${Number(n ?? 0).toFixed(2)}`;
@@ -702,7 +702,7 @@ export async function fetchCommandcode() {
       percent: pct(w),
       // 未使用の枠は resetAt:0 で返るため、時刻は出さない（窓は使い始めから回り出す）
       resetAt: Number(w.resetAt) > 0 ? fmtReset(w.resetAt) : null,
-      detail: used > 0 ? `${usd2(w.used)} / ${usd2(w.cap)}` : `未使用 · 上限 ${usd2(w.cap)}`,
+      detail: used > 0 ? `${usd2(w.used)} / ${usd2(w.cap)}` : `unused · cap ${usd2(w.cap)}`,
     });
   };
   pushWindow("5-hour window", wl.fiveHour);
@@ -729,7 +729,7 @@ export async function fetchCommandcode() {
       const u = await res.json();
       if (Number.isFinite(Number(u?.totalTokensIn))) {
         summary = {
-          range: "請求期間",
+          range: "Billing period",
           input: Number(u.totalTokensIn),
           output: Number(u.totalTokensOut ?? 0),
           cost: Number(u.totalCost ?? 0),
@@ -749,7 +749,7 @@ export async function fetchCommandcode() {
       label: "Monthly credits",
       percent: total > 0 ? Math.round((spent / total) * 1000) / 10 : null,
       resetAt: periodEnd ? fmtIso(periodEnd) : null,
-      detail: `${usd2(spent)} / ${usd2(total)} · 残り ${usd2(remaining)}`,
+      detail: `${usd2(spent)} / ${usd2(total)} · ${usd2(remaining)} left`,
     });
   }
 

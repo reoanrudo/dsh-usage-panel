@@ -51,13 +51,13 @@ async function zaiKeyCandidates() {
 }
 
 const LIMIT_LABEL = {
-  TOKENS_LIMIT: "トークン",
-  TIME_LIMIT: "MCP呼び出し（時間）",
+  TOKENS_LIMIT: "Tokens",
+  TIME_LIMIT: "MCP calls",
 };
 
 function unitLabel(unit) {
   // Z.AI の unit: 3=時間, 5=月, 6=週 相当
-  return { 3: "時間", 5: "月", 6: "週" }[unit] ?? `unit${unit}`;
+  return { 3: "h", 5: "mo", 6: "wk" }[unit] ?? `unit${unit}`;
 }
 
 function fmtReset(ms) {
@@ -68,10 +68,10 @@ function fmtReset(ms) {
 
 async function fetchGlm() {
   const keys = await zaiKeyCandidates();
-  if (!keys.length) return { ok: false, error: "Z.AI API キーが見つかりません（ZAI_API_KEY を設定してください）" };
+  if (!keys.length) return { ok: false, error: "no Z.AI API key found (set ZAI_API_KEY)" };
 
   let body = null;
-  let lastError = "取得失敗";
+  let lastError = "fetch failed";
   for (const key of keys) {
     const res = await fetch("https://api.z.ai/api/monitor/usage/quota/limit", {
       headers: { Authorization: `Bearer ${key}`, "Accept-Language": "en-US" },
@@ -87,7 +87,7 @@ async function fetchGlm() {
     }
     lastError = b.msg ?? lastError;
   }
-  if (!body) return { ok: false, error: `${lastError}（全候補キーで失敗。キーの失効を確認してください）` };
+  if (!body) return { ok: false, error: `${lastError} (all keys failed — check for expired keys)` };
   const limits = (body.data?.limits ?? []).map((l) => ({
     type: l.type,
     label: LIMIT_LABEL[l.type] ?? l.type,
@@ -126,7 +126,7 @@ async function fetchOpencodeGo() {
       maxBuffer: 16 * 1024 * 1024,
     }));
   } catch (e) {
-    return { ok: false, error: `opencode stats 実行に失敗: ${e.message.split("\n")[0]}` };
+    return { ok: false, error: `opencode stats failed: ${e.message.split("\n")[0]}` };
   }
   const stats = JSON.parse(stdout);
   // 実出力: models[] = { model: { id, providerID }, steps, tokens: {input,output,cache:{read,write}}, cost }
@@ -144,11 +144,11 @@ async function fetchOpencodeGo() {
   const goModels = models.filter((m) => m.provider === "opencode-go");
   return {
     ok: true,
-    range: "過去7日",
+    range: "Last 7 days",
     sessions: stats.sessions ?? 0,
     totals: sumModels(goModels),
     models: goModels,
-    note: "opencode go の残量 API は公開されていないため、このマシンでの記録値です。",
+    note: "opencode go has no public quota API — figures are local records from this machine.",
   };
 }
 
@@ -158,29 +158,29 @@ const fmtN = (n) => Number(n ?? 0).toLocaleString("en-US");
 const fmtUsd = (n) => `$${Number(n ?? 0).toFixed(4)}`;
 
 function renderGlm(g) {
-  const out = ["■ GLM（Z.AI）" + (g.level ? `  プラン: ${g.level}` : "")];
+  const out = ["■ GLM (Z.AI)" + (g.level ? `  plan: ${g.level}` : "")];
   if (!g.ok) return [...out, `  ✗ ${g.error}`].join("\n");
   for (const l of g.limits) {
     const pct = l.percentage != null ? `${l.percentage}%` : "-";
-    const warn = l.percentage >= 90 ? " ⚠️ 上限間近" : "";
-    out.push(`  ${l.label}（${l.window}）: ${pct} 使用${warn}  リセット: ${l.resetAt}`);
-    if (l.usage != null) out.push(`      上限 ${fmtN(l.usage)} / 残 ${fmtN(l.remaining)}`);
+    const warn = l.percentage >= 90 ? " ⚠️ near limit" : "";
+    out.push(`  ${l.label} (${l.window}): ${pct} used${warn}  reset: ${l.resetAt}`);
+    if (l.usage != null) out.push(`      limit ${fmtN(l.usage)} / left ${fmtN(l.remaining)}`);
     for (const d of l.details) out.push(`      - ${d.model}: ${fmtN(d.usage)}`);
   }
   return out.join("\n");
 }
 
 function renderOpencode(o) {
-  const out = ["■ opencode go（" + o.range + "）"];
+  const out = ["■ opencode go (" + o.range + ")"];
   if (!o.ok) return [...out, `  ✗ ${o.error}`].join("\n");
   const t = o.totals;
-  out.push(`  セッション ${fmtN(o.sessions)} / 呼び出し ${fmtN(t.calls)}`);
-  out.push(`  入力 ${fmtN(t.input)} / 出力 ${fmtN(t.output)} / キャッシュ読 ${fmtN(t.cacheRead)}`);
-  out.push(`  コスト ${fmtUsd(t.cost)}`);
+  out.push(`  sessions ${fmtN(o.sessions)} / calls ${fmtN(t.calls)}`);
+  out.push(`  input ${fmtN(t.input)} / output ${fmtN(t.output)} / cache read ${fmtN(t.cacheRead)}`);
+  out.push(`  cost ${fmtUsd(t.cost)}`);
   if (o.models.length) {
-    out.push("  モデル別:");
+    out.push("  by model:");
     for (const m of o.models) {
-      out.push(`    - ${m.model}: 入力 ${fmtN(m.inputTokens)} / 出力 ${fmtN(m.outputTokens)} / ${fmtUsd(m.cost)}`);
+      out.push(`    - ${m.model}: input ${fmtN(m.inputTokens)} / output ${fmtN(m.outputTokens)} / ${fmtUsd(m.cost)}`);
     }
   }
   out.push(`  ※ ${o.note}`);
